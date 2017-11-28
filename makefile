@@ -1,9 +1,9 @@
 NUM = 5
-SOURCE = CA$(NUM).cpp course.cpp Student.cpp
-HEADERS = course.h student.h
-OUT = CA$(NUM).o 
+SOURCE = CA$(NUM).cpp Course.cpp Student.cpp
+HEADERS = Course.h Student.h
+OUT = CA$(NUM).o Course.o Student.o
 FLAGS = -g -Wall -Wextra -Wno-unused-parameter
-NAME = Scheduler
+NAME = schedule.exe
 FILE = Closs_Carl_ccloss1_CA$(NUM).tar.gz
 TESTOPTS = lol
 DEBUG_OPTS = --silent
