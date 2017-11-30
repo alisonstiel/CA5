@@ -7,8 +7,6 @@ NAME = schedule.exe
 FILE = Closs_Carl_ccloss1_CA$(NUM).tar.gz
 TESTOPTS = lol
 DEBUG_OPTS = --silent
-check: 
-	g++ -dumpspec
 all: $(NAME)
 test: $(NAME)
 	./$(NAME) $(TESTOPTS)
@@ -22,7 +20,7 @@ $(NAME): $(SOURCE) $(HEADERS)
 clean:
 	rm -f *.o *.swp *.gch .go* $(NAME)
 submit: $(NAME) clean
-	cd .. && 	tar -cvzf  $(FILE) CA$(NUM)ccloss1 
+	cd .. && 	tar -cvzf  $(FILE) CA$(NUM)
 ifneq "$(findstring remote, $(HOST))"  "remote"
 		firefox submit.htm
 else 
