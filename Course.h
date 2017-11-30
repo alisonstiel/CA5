@@ -18,8 +18,9 @@ class Course{
 		void setCredits(int c);
 		std::string getName();
 		std::unordered_set<std::string> getTags();
-	private:
 		std::list<std::string> prereqs;
+		bool touched; //false = white, true = grey or black. Note that we don't need to keep track of distance, and we are currently proccessing the predecessor of the node when we find the student doesn't have the prereq 
+	private:
 		std::string name;
 		int credits;
 		std::unordered_set<std::string> tags;
