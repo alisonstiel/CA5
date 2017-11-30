@@ -22,3 +22,27 @@ std::unordered_map<std::string, Course> Student::getSchedule(){
 std::unordered_map<std::string, Course> Student::getCourses(){
     return courses;
 }
+
+std::string Student::findLackingPrereq(const std::string& courseName){
+	std::list<std::string> queue;
+	for(auto i = courses.begin(); i != courses.end(); i++){
+		i.touched = false;
+	}
+	if(courses.count(courseName) == 0){
+		return "Course does not exist";
+	}
+	while(course.size() > 0){
+		Course c = courses[*queue.front()];
+		queue.pop_front();
+		c.touched = true;
+		for(auto pre = c.getPrereqs().begin(); c != c.getPrereqs().end(); c++){
+			pre.touched = true;
+			if(schedule.count(pre) == 0){
+				return pre;
+			}
+			if(!courses[pre].touched) queue.push_back(pre);
+		}
+	}
+	return "";
+
+}

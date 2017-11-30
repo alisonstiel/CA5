@@ -14,5 +14,6 @@ class Student{
 	private:
 		std::unordered_map<std::string, bool> requirements; //student's course requirements in order to graduate
 		std::unordered_map<std::string, Course> schedule; //student's complete planned schedule
-		std::unordered_map<std::string, Course> courses; //all possible courses offered		
+		std::unordered_map<std::string, Course> courses; //all possible courses offered	
+		std::string findLackingPrereq(const std::string& courseName);	
 };
