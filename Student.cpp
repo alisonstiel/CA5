@@ -4,21 +4,21 @@
 #include <unordered_map>
 #include "Student.h"
 
-void Student::addRequirement(Course& req){
-    requirements.insert(std::make_pair<Course,bool>(req,false));
+void Student::addRequirement(std::string& courseName){
+    requirements.insert(std::make_pair<std::string,bool>(courseName,false));
 }
 void Student::addToSchedule(Course& course){
-    schedule.insert(course);
+    schedule.insert(std::make_pair<std::string,Course>(course.getName(),course));
 }
 void Student::addCourse(Course& course){
-    courses.insert(course);
+    courses.insert(std::make_pair<std::string,Course>(course.getName(),course));
 }
-std::unordered_map<Course, bool> Student::getRequirements(){
+std::unordered_map<std::string, bool> Student::getRequirements(){
     return requirements;
 }
-std::unordered_set<Course> Student::getSchedule(){
+std::unordered_map<std::string, Course> Student::getSchedule(){
     return schedule;
 }
-std::unordered_set<Course> Student::getCourses(){
+std::unordered_map<std::string, Course> Student::getCourses(){
     return courses;
 }
