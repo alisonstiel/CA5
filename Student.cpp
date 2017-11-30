@@ -31,7 +31,7 @@ std::string Student::findLackingPrereq(const std::string& courseName){
 	if(courses.count(courseName) == 0){
 		return "Course does not exist";
 	}
-	while(course.size() > 0){
+	while(queue.size() > 0){
 		Course c = courses[*queue.front()];
 		queue.pop_front();
 		c.touched = true;
