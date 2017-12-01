@@ -2,7 +2,10 @@
 #include <list>
 #include <unordered_set>
 #include "Course.h"
-
+Course::Course(){
+	name = "";
+	credits = -1;
+}
 Course::Course(std::string name){
 	this -> name = name;
 }

@@ -5,9 +5,9 @@
 #include "Course.h"
 class Student{
 	public:
-		void addRequirement(std::string& courseName); 
-		void addToSchedule(Course& course); 
-		void addCourse(Course& course);
+		void addRequirement(std::string courseName); 
+		void addToSchedule(Course course); 
+		void addCourse(Course course);
 		std::unordered_map<std::string, bool> getRequirements();
 		std::unordered_map<std::string, Course> getSchedule();
 		std::unordered_map<std::string, Course> getCourses();

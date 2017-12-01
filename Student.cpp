@@ -4,14 +4,14 @@
 #include <unordered_map>
 #include "Student.h"
 
-void Student::addRequirement(std::string& courseName){
-    requirements.insert(std::make_pair<std::string,bool>(courseName,false));
+void Student::addRequirement(std::string courseName){
+    requirements[courseName] = false;
 }
-void Student::addToSchedule(Course& course){
-    schedule.insert(std::make_pair<std::string,Course>(course.getName(),course));
+void Student::addToSchedule(Course course){
+    schedule[course.getName()] = course;
 }
-void Student::addCourse(Course& course){
-    courses.insert(std::make_pair<std::string,Course>(course.getName(),course));
+void Student::addCourse(Course course){
+    courses[course.getName()] = course;
 }
 std::unordered_map<std::string, bool> Student::getRequirements(){
     return requirements;
@@ -26,21 +26,21 @@ std::unordered_map<std::string, Course> Student::getCourses(){
 std::string Student::findLackingPrereq(const std::string& courseName){
 	std::list<std::string> queue;
 	for(auto i = courses.begin(); i != courses.end(); i++){
-		i.touched = false;
+		(std::get<1>(*i)).touched = false;
 	}
 	if(courses.count(courseName) == 0){
 		return "Course does not exist";
 	}
 	while(queue.size() > 0){
-		Course c = courses[*queue.front()];
+		Course c = courses[*queue.begin()];
 		queue.pop_front();
 		c.touched = true;
-		for(auto pre = c.getPrereqs().begin(); c != c.getPrereqs().end(); c++){
-			pre.touched = true;
-			if(schedule.count(pre) == 0){
-				return pre;
+		for(auto pre = c.prereqs.begin(); pre != c.prereqs.end(); pre++){
+			courses[*pre].touched = true;
+			if(schedule.count(*pre) == 0){
+				return *pre;
 			}
-			if(!courses[pre].touched) queue.push_back(pre);
+			if(!courses[*pre].touched) queue.push_back(*pre);
 		}
 	}
 	return "";

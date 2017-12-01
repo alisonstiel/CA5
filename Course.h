@@ -8,6 +8,7 @@ class Course{
 		enum Offered{Spr,Fall,Every};
 		enum Require{Mandatory, Required, Optional};
 		Course(std::string name);
+		Course();
 		void addTag(const std::string& tag); 
 		void addPrereq(const std::string& name);
 		Offered getOfferedTimes();
