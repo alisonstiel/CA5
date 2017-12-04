@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <iterator>
 
 int main(int argc, char** argv){
 	if(argc < 4){
