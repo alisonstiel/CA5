@@ -6,7 +6,11 @@
 #include <vector>
 #include <sstream>
 #include <iterator>
+#include <regex>
+#include <unordered_map>
 
+void fail(const std::string& reason);
+ 
 int main(int argc, char** argv){
 	if(argc < 4){
 		std::cout << "Format: <requirements> <offerings> <schedule>\n";
@@ -87,7 +91,7 @@ int main(int argc, char** argv){
 				//check for tags
 				if(arr.size() == 4){
 					std::string tags = arr.at(3);
-					for(int i = 0; i<tags.length(); i++){
+					for(unsigned int i = 0; i<tags.length(); i++){
 						if(isalpha(tags[i])){
 							newCourse.addTag(tags[i]);
 						}else{
@@ -101,10 +105,51 @@ int main(int argc, char** argv){
 			std::cout << "Bad course offerings file format" << std::endl;
 		}	
 	}
+	std::unordered_map<std::string, Course> courses = student.getCourses();
+	//set up requirement graph
 	while(!reqs.eof()){
-		//set up requirement graph
+		std::string line;
+		std::getline(planned,line);
+		std::istringstream aLine(line); 
+		std::istream_iterator<std::string> word(aLine), end;
+		//
+
 	}
+	//CHANGED: set up planned schedule to check in next loop
+	int num = 1;
 	while(!planned.eof()){
-		//Do actual checking
+		std::string line, semester;
+		std::getline(planned,line);
+		std::istringstream aLine(line); 
+		std::istream_iterator<std::string> word(aLine), end;
+		std::regex semester_format("S|F[0-9]{4,}");
+		if(std::regex_match(*word, semester_format)){
+			semester = *word;
+			word++;
+			while(word != end){
+				if(courses[*word].getCredits() < 0){
+					fail("Course " + *word + " is not offered here.");
+				}
+				if(semester[0] == 'F' && courses[*word].getOfferedTimes() == Course::Offered::Spr){
+					fail("Course " + *word + "is not offered in the fall");
+				}
+				if(semester[0] == 'S' && courses[*word].getOfferedTimes() == Course::Offered::Fall){
+					fail("Course " + *word + " is not offered in the spring");
+				} else {
+					//reworked add to schedule
+				}
+				word++;
+			}
+
+		} else {
+			std::cout << "Line " << num << ": Bad semester name " << *word;
+		}
+		num++;
+
 	}
+}
+
+void fail(const std::string& reason){
+	std::cout << "Bad plan. Here's why: " << reason << std::endl;
+	exit(0);
 }
