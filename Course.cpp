@@ -26,10 +26,11 @@ std::string Course::getName(){
 	return name;
 }
 
-std::unordered_set<std::string> Course::getTags(){
+std::unordered_set<char> Course::getTags(){
 	return tags;
 }
-void Course::addTag(const std::string& tag){
+
+void Course::addTag(const char& tag){
 	tags.insert(tag);
 }
 
@@ -49,6 +50,21 @@ void Course::setRequired(Course::Require r){
 	req = r;
 }
 
+Course::Offered Course::stringToOffered(std::string str){
+	Offered o;
+	if(str == "S"){
+		o = Spr;
+	}else if(str == "F"){
+		o = Fall;
+	}else if(str == "E"){
+		o = Every;
+	}
+	return o;
+}
 
-
-
+void Course::printCourseInfo(){
+	std::cout << "Name: " << getName() << std::endl;
+	std::cout << "Credits: " << getCredits() << std::endl;
+	std::cout << "Offered: " << getOfferedTimes() << std::endl;	
+	std::cout << "Num of Tags: " << getTags().size() << std::endl;		
+}
