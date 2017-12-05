@@ -115,6 +115,7 @@ int main(int argc, char** argv){
 		//
 
 	}
+
 	//CHANGED: set up planned schedule to check in next loop
 	int num = 1;
 	while(!planned.eof()){
@@ -126,6 +127,7 @@ int main(int argc, char** argv){
 		if(std::regex_match(*word, semester_format)){
 			semester = *word;
 			word++;
+			int credits;
 			while(word != end){
 				if(courses[*word].getCredits() < 0){
 					fail("Course " + *word + " is not offered here.");
@@ -137,10 +139,15 @@ int main(int argc, char** argv){
 					fail("Course " + *word + " is not offered in the spring");
 				} else {
 					//reworked add to schedule
+					credits += courses[*word].getCredits();
 				}
 				word++;
 			}
-
+			if(credits > 18){
+				std::cout << "Note: you are overloading on semester " << semester << ". This may require special approval depending on your GPA." << std::endl;
+			} else if(credits < 12){
+				std::cout << "Warning: the schedule for" << semester << " is not full-time (at least 12 credits). This may endanger federal financial aid." << std::endl;
+			}
 		} else {
 			std::cout << "Line " << num << ": Bad semester name " << *word;
 		}
