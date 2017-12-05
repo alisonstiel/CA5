@@ -2,6 +2,7 @@
 #include <list>
 #include <unordered_set>
 #include <unordered_map>
+#include <map>
 #include "Student.h"
 
 Student::Student(){
@@ -13,8 +14,17 @@ void Student::addRequirement(std::string courseName){
     requirements[courseName] = false;
 }
 
-void Student::addToSchedule(Course course){
-    schedule[course.getName()] = course;
+void Student::addToSchedule(std::string semester, std::string courseName){
+	if(semester.front() == 'S'){
+		semester.erase(0,0);
+		semester+=".1";
+	}else if(semester.front() == 'F'){
+		semester.erase(0,0);
+		semester+=".2";
+	}else{
+		std::cout << "Bad semester format" << std::endl;
+	}
+	schedule[semester].insert(courseName);
 }
 
 void Student::addCourse(Course course){
@@ -23,14 +33,12 @@ void Student::addCourse(Course course){
 
 void Student::addRequiredCredits(std::string reqType, int credits){
 	if(credits > 0){
-		requiredCredits["total"] += credits;
 		requiredCredits[reqType] += credits; //creates a new key if reqType doesn't yet exist, or increments it's value if it does exist 	
 	}
 }
 
 void Student::addScheduleCredits(std::string reqType, int credits){
 	if(credits > 0){
-		scheduleCredits["total"] += credits;
 		scheduleCredits[reqType] += credits;	
 	}
 }
@@ -39,7 +47,7 @@ std::unordered_map<std::string, bool> Student::getRequirements(){
     return requirements;
 }
 
-std::unordered_map<std::string, Course> Student::getSchedule(){
+std::map<std::string, std::unordered_set<std::string> > Student::getSchedule(){
     return schedule;
 }
 
