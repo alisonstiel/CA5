@@ -5,10 +5,6 @@
 #include <map>
 #include "Student.h"
 
-Student::Student(){
-	requiredCredits["total"] = 0;
-	scheduleCredits["total"] = 0;	
-}
 
 void Student::addRequirement(std::string courseName){
     requirements[courseName] = false;
