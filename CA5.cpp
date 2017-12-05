@@ -158,7 +158,8 @@ int main(int argc, char** argv){
 					student.addToSchedule(semester, *word);
 					credits += courses[*word].getCredits();
 					for(char t : courses[*word].getTags()){
-						student.addRequiredCredits(t, courses[*word].getCredits()); //this does credits the student is taking... I think.
+						std::string s(1,t);
+						student.addRequiredCredits(s, courses[*word].getCredits()); //this does credits the student is taking... I think.
 					}
 				}
 				word++;
