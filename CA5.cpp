@@ -106,14 +106,31 @@ int main(int argc, char** argv){
 		}	
 	}
 	std::unordered_map<std::string, Course> courses = student.getCourses();
+	int linenum = 1;
 	//set up requirement graph
 	while(!reqs.eof()){
 		std::string line;
 		std::getline(planned,line);
 		std::istringstream aLine(line); 
 		std::istream_iterator<std::string> word(aLine), end;
-		//
-
+		if(*word == "TOTAL"){
+			word++;
+			//...
+		}
+		else if(*word == "CREDIT"){
+			word++;
+			//...
+		}
+		else if(*word == "COURSE"){
+			word++;
+		}
+		else if(*word == "CHOOSE"){
+			word++;
+		}
+		else{
+			std::cout << "Line " << linenum << ": Bad first word " << *word; 
+		}
+		linenum++;
 	}
 
 	//CHANGED: set up planned schedule to check in next loop
@@ -138,8 +155,11 @@ int main(int argc, char** argv){
 				if(semester[0] == 'S' && courses[*word].getOfferedTimes() == Course::Offered::Fall){
 					fail("Course " + *word + " is not offered in the spring");
 				} else {
-					//reworked add to schedule
+					student.addToSchedule(semester, *word);
 					credits += courses[*word].getCredits();
+					for(char t : courses[*word].getTags()){
+						student.addRequiredCredits(t, courses[*word].getCredits()); //this does credits the student is taking... I think.
+					}
 				}
 				word++;
 			}
