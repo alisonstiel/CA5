@@ -94,11 +94,14 @@ int main(int argc, char** argv){
 					std::string tags = arr.at(3);
 					for(unsigned int i = 0; i<tags.length(); i++){
 						if(isalpha(tags[i])){
-							newCourse.addTag(tags[i]);
+							std::string s(1,tags[i]);
+							newCourse.addTag(s);
 						}else{
 							std::cout << "Line " << num << ": Bad tag format " << tags << std::endl;
 						}
 					}
+				}else{
+					newCourse.addTag("CS"); //courses that don't have tags are CS courses
 				}
 				student.addCourse(newCourse);				
 			}
@@ -159,9 +162,8 @@ int main(int argc, char** argv){
 				} else {
 					student.addToSchedule(semester, *word);
 					credits += courses[*word].getCredits();
-					for(char t : courses[*word].getTags()){
-						std::string s(1,t);
-						student.addRequiredCredits(s, courses[*word].getCredits()); //this does credits the student is taking... I think.
+					for(std::string t : courses[*word].getTags()){
+						student.addScheduleCredits(t, courses[*word].getCredits()); //this does credits the student is taking... I think.
 					}
 				}
 				word++;
