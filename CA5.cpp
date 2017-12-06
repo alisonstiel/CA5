@@ -32,6 +32,7 @@ int main(int argc, char** argv){
 	
 	//populate course hash map
 	while(!offers.eof()){
+		int num = 1;
 		std::getline(offers, line);
 		std::istringstream inputString(line);
         std::istream_iterator<std::string> begin(inputString), end;
@@ -52,10 +53,10 @@ int main(int argc, char** argv){
 				if(upperCheck && digitCheck){
 					goodName = true;
 				}else{
-					std::cout << courseName << ": Bad course name format" << std::endl;
+					std::cout << "Line " << num << ": Bad course name format " << courseName << std::endl;
 				}
 			}else{
-				std::cout << courseName << ": Bad course name length" << std::endl;
+				std::cout << "Line " << num << ": Bad course name length " << courseName << std::endl;
 			}
 
 			//check credit format
@@ -64,10 +65,10 @@ int main(int argc, char** argv){
 				if(credInt >=1 && credInt <= 4){
 					goodCredits = true;
 				}else{
-					std::cout << credits << ": Bad number of credits" << std::endl;
+					std::cout << "Line " << num << ": Bad number of credits " << credits << std::endl;
 				}
 			}else{
-				std::cout << credits << ": Bad credit format" << std::endl;
+				std::cout << "Line " << num << ": Bad credit format " << credits << std::endl;
 			}
 
 			//check offered time format
@@ -75,10 +76,10 @@ int main(int argc, char** argv){
 				if(offered == "S" || offered == "F" || offered == "E"){
 					goodOffered = true;
 				}else{
-					std::cout << offered << ": Bad semester offered letter" << std::endl;
+					std::cout << "Line " << num << ": Bad semester offered letter " << offered << std::endl;
 				}
 			}else{
-				std::cout << offered << ": Bad semester offered format" << std::endl;
+				std::cout << "Line " << num << ": Bad semester offered format " << offered << std::endl;
 			}
 
 			//create course object if everything passed
@@ -95,15 +96,16 @@ int main(int argc, char** argv){
 						if(isalpha(tags[i])){
 							newCourse.addTag(tags[i]);
 						}else{
-							std::cout << tags << ": Bad tag format" << std::endl;
+							std::cout << "Line " << num << ": Bad tag format " << tags << std::endl;
 						}
 					}
 				}
 				student.addCourse(newCourse);				
 			}
 		}else{
-			std::cout << "Bad course offerings file format" << std::endl;
-		}	
+			std::cout << "Line " << num << ": Bad course offerings file format" << std::endl;
+		}
+		num++;
 	}
 	std::unordered_map<std::string, Course> courses = student.getCourses();
 	int linenum = 1;
