@@ -59,7 +59,7 @@ std::unordered_map<std::string, int> Student::getScheduleCredits(){
     return scheduleCredits;
 }
 
-std::string Student::findLackingPrereq(const std::string& courseName, const std::string semester){
+std::string Student::findLackingPrereq(const std::string& courseName, const std::string& semester){
 	std::list<std::string> queue;
 	for(auto i = courses.begin(); i != courses.end(); i++){
 		(std::get<1>(*i)).touched = false;
@@ -83,7 +83,7 @@ std::string Student::findLackingPrereq(const std::string& courseName, const std:
 
 }
 //Check to see if student has taken the course before the given semester
-bool hasTaken(const std::string& course, const std::string& semester){
+bool Student::hasTaken(const std::string& course, const std::string& semester){
 	for(auto sem = schedule.begin(); sem != schedule.end() && std::get<0>(*sem) < semester; sem++){
 		if(std::get<1>(*sem).count(course)) return true;
 	}

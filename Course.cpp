@@ -26,11 +26,11 @@ std::string Course::getName(){
 	return name;
 }
 
-std::unordered_set<char> Course::getTags(){
+std::unordered_set<std::string> Course::getTags(){
 	return tags;
 }
 
-void Course::addTag(const char& tag){
+void Course::addTag(const std::string& tag){
 	tags.insert(tag);
 }
 

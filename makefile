@@ -1,3 +1,4 @@
+#Alison Stiel and Carl Closs
 NUM = 5
 SOURCE = CA$(NUM).cpp Course.cpp Student.cpp
 HEADERS = Course.h Student.h

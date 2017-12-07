@@ -33,6 +33,7 @@ int main(int argc, char** argv){
 	
 	//populate course hash map
 	while(!offers.eof()){
+		int num = 1;
 		std::getline(offers, line);
 		std::istringstream inputString(line);
         std::istream_iterator<std::string> begin(inputString), end;
@@ -53,10 +54,10 @@ int main(int argc, char** argv){
 				if(upperCheck && digitCheck){
 					goodName = true;
 				}else{
-					std::cout << courseName << ": Bad course name format" << std::endl;
+					std::cout << "Line " << num << ": Bad course name format " << courseName << std::endl;
 				}
 			}else{
-				std::cout << courseName << ": Bad course name length" << std::endl;
+				std::cout << "Line " << num << ": Bad course name length " << courseName << std::endl;
 			}
 
 			//check credit format
@@ -65,10 +66,10 @@ int main(int argc, char** argv){
 				if(credInt >=1 && credInt <= 4){
 					goodCredits = true;
 				}else{
-					std::cout << credits << ": Bad number of credits" << std::endl;
+					std::cout << "Line " << num << ": Bad number of credits " << credits << std::endl;
 				}
 			}else{
-				std::cout << credits << ": Bad credit format" << std::endl;
+				std::cout << "Line " << num << ": Bad credit format " << credits << std::endl;
 			}
 
 			//check offered time format
@@ -76,10 +77,10 @@ int main(int argc, char** argv){
 				if(offered == "S" || offered == "F" || offered == "E"){
 					goodOffered = true;
 				}else{
-					std::cout << offered << ": Bad semester offered letter" << std::endl;
+					std::cout << "Line " << num << ": Bad semester offered letter " << offered << std::endl;
 				}
 			}else{
-				std::cout << offered << ": Bad semester offered format" << std::endl;
+				std::cout << "Line " << num << ": Bad semester offered format " << offered << std::endl;
 			}
 
 			//create course object if everything passed
@@ -94,17 +95,21 @@ int main(int argc, char** argv){
 					std::string tags = arr.at(3);
 					for(unsigned int i = 0; i<tags.length(); i++){
 						if(isalpha(tags[i])){
-							newCourse.addTag(tags[i]);
+							std::string s(1,tags[i]);
+							newCourse.addTag(s);
 						}else{
-							std::cout << tags << ": Bad tag format" << std::endl;
+							std::cout << "Line " << num << ": Bad tag format " << tags << std::endl;
 						}
 					}
+				}else if(arr.at(0).find("CS")){
+					newCourse.addTag("CS"); //courses that don't have tags are CS courses <- not true, see MA304!
 				}
 				student.addCourse(newCourse);				
 			}
 		}else{
-			std::cout << "Bad course offerings file format" << std::endl;
-		}	
+			std::cout << "Line " << num << ": Bad course offerings file format" << std::endl;
+		}
+		num++;
 	}
 	std::unordered_map<std::string, Course> courses = student.getCourses();
 	int linenum = 1;
@@ -116,7 +121,7 @@ int main(int argc, char** argv){
 		std::istream_iterator<std::string> word(aLine), end;
 		if(*word == "TOTAL"){
 			word++;
-			if(std::regex_match(*word, regex("[0-9]+"))){
+			if(std::regex_match(*word, std::regex("[0-9]+"))){
 				int cred = std::stoi(*word);
 				student.addRequiredCredits("total", cred); 
 			} else {
@@ -127,12 +132,12 @@ int main(int argc, char** argv){
 		else if(*word == "CREDIT"){
 			word++;
 			std::string tag = *word;
-			if(!std::regex_match(regex([A-Z]), tag)){
+			if(!std::regex_match(tag, std::regex("[A-Z]"))){
 				std::cout << "CREDIT tag on line " << linenum << " must be exactly one letter long\n";
 				continue;
 			}
-			word++
-			if(std::regex_match(*word, regex("[0-9]+"))){
+			word++;
+			if(std::regex_match(*word, std::regex("[0-9]+"))){
 				int cred = std::stoi(*word);
 				student.addRequiredCredits("total", cred); 
 			} else {
@@ -176,12 +181,8 @@ int main(int argc, char** argv){
 				} else {
 					student.addToSchedule(semester, *word);
 					credits += courses[*word].getCredits();
-					for(char t : courses[*word].getTags()){
-						std::string s(1,t);
-						student.addScheduleCredits(s, courses[*word].getCredits());
-					}
-					if((*word).find("CS")){
-						student.addScheduleCredits("total", courses[*word].getCredits());
+					for(std::string t : courses[*word].getTags()){
+						student.addScheduleCredits(t, courses[*word].getCredits()); //this does credits the student is taking... I think.
 					}
 				}
 				word++;
@@ -197,16 +198,16 @@ int main(int argc, char** argv){
 		num++;
 
 	}
-}
 //Prerequisite checking
-for(auto sem = student.getSchedule().begin(); sem != student.getSchedule().end(); sem++){
-	for(auto course = std::get<1>(sem).begin(); course != std::get<1>(sem).end(); course++){
-		std::string lacking = student.getLackingPrereq(*course);
-		if(lacking != ""){
-			fail(lacking + " is required to take " + *course);
+	for(auto sem = student.getSchedule().begin(); sem != student.getSchedule().end(); sem++){
+		for(auto course = std::get<1>(*sem).begin(); course != std::get<1>(*sem).end(); course++){
+			std::string lacking = student.findLackingPrereq(*course, std::get<0>(*sem));
+			if(lacking != ""){
+				fail(lacking + " is required to take " + *course);
+			}
 		}
 	}
-}
+}	
 
 void fail(const std::string& reason){
 	std::cout << "Bad plan. Here's why: " << reason << std::endl;
