@@ -8,6 +8,7 @@
 #include <iterator>
 #include <regex>
 #include <unordered_map>
+#include <map>
 
 void fail(const std::string& reason);
  
@@ -115,11 +116,29 @@ int main(int argc, char** argv){
 		std::istream_iterator<std::string> word(aLine), end;
 		if(*word == "TOTAL"){
 			word++;
-			//...
+			if(std::regex_match(*word, regex("[0-9]+"))){
+				int cred = std::stoi(*word);
+				student.addRequiredCredits("total", cred); 
+			} else {
+				std::cout << "Bad total number of CS credits needed one line " << linenum << std::endl;
+			}
+			
 		}
 		else if(*word == "CREDIT"){
 			word++;
-			//...
+			std::string tag = *word;
+			if(!std::regex_match(regex([A-Z]), tag)){
+				std::cout << "CREDIT tag on line " << linenum << " must be exactly one letter long\n";
+				continue;
+			}
+			word++
+			if(std::regex_match(*word, regex("[0-9]+"))){
+				int cred = std::stoi(*word);
+				student.addRequiredCredits("total", cred); 
+			} else {
+				std::cout << "Bad total number of CS credits needed" << std::endl;
+			}
+		
 		}
 		else if(*word == "COURSE"){
 			word++;
@@ -150,7 +169,7 @@ int main(int argc, char** argv){
 					fail("Course " + *word + " is not offered here.");
 				}
 				if(semester[0] == 'F' && courses[*word].getOfferedTimes() == Course::Offered::Spr){
-					fail("Course " + *word + "is not offered in the fall");
+					fail("Course " + *word + " is not offered in the fall");
 				}
 				if(semester[0] == 'S' && courses[*word].getOfferedTimes() == Course::Offered::Fall){
 					fail("Course " + *word + " is not offered in the spring");
@@ -159,7 +178,10 @@ int main(int argc, char** argv){
 					credits += courses[*word].getCredits();
 					for(char t : courses[*word].getTags()){
 						std::string s(1,t);
-						student.addRequiredCredits(s, courses[*word].getCredits()); //this does credits the student is taking... I think.
+						student.addScheduleCredits(s, courses[*word].getCredits());
+					}
+					if((*word).find("CS")){
+						student.addScheduleCredits("total", courses[*word].getCredits());
 					}
 				}
 				word++;
@@ -174,6 +196,15 @@ int main(int argc, char** argv){
 		}
 		num++;
 
+	}
+}
+//Prerequisite checking
+for(auto sem = student.getSchedule().begin(); sem != student.getSchedule().end(); sem++){
+	for(auto course = std::get<1>(sem).begin(); course != std::get<1>(sem).end(); course++){
+		std::string lacking = student.getLackingPrereq(*course);
+		if(lacking != ""){
+			fail(lacking + " is required to take " + *course);
+		}
 	}
 }
 

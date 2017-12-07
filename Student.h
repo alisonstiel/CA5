@@ -16,11 +16,13 @@ class Student{
 		std::unordered_map<std::string, Course> getCourses();
 		std::unordered_map<std::string, int> getRequiredCredits();	
 		std::unordered_map<std::string, int> getScheduleCredits();
+		bool hasTaken(const std::string& course, const std::string semester);
 	private:
 		std::unordered_map<std::string, bool> requirements; //student's course requirements in order to graduate
 		std::map<std::string, std::unordered_set<std::string> > schedule; //student's complete planned schedule, ordered by semester
 		std::unordered_map<std::string, Course> courses; //all possible courses offered
 		std::unordered_map<std::string, int> requiredCredits; //map of student's required credits types: total, H, C, F...
 		std::unordered_map<std::string, int> scheduleCredits; //map of student's schedule's credits types: total, H, C, F...
-		std::string findLackingPrereq(const std::string& courseName);	
+		std::string findLackingPrereq(const std::string& courseName);
+			
 };
