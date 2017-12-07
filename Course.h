@@ -6,7 +6,7 @@
 class Course{
 	public:
 		enum Offered{Spr,Fall,Every};
-		enum Require{Mandatory, Required, Optional};
+		enum Require{Mandatory, Required, Optional, Unknown};
 		Course(std::string name);
 		Course();
 		void addTag(const std::string& tag); 

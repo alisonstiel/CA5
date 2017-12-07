@@ -8,6 +8,7 @@
 #include <iterator>
 #include <regex>
 #include <unordered_map>
+#include <unordered_set>
 #include <map>
 
 void fail(const std::string& reason);
@@ -114,6 +115,7 @@ int main(int argc, char** argv){
 	std::unordered_map<std::string, Course> courses = student.getCourses();
 	int linenum = 1;
 	//set up requirement graph
+	std::unordered_set<std::string> required;
 	while(!reqs.eof()){
 		std::string line;
 		std::getline(planned,line);
@@ -134,6 +136,7 @@ int main(int argc, char** argv){
 			std::string tag = *word;
 			if(!std::regex_match(tag, std::regex("[A-Z]"))){
 				std::cout << "CREDIT tag on line " << linenum << " must be exactly one letter long\n";
+				linenum++;
 				continue;
 			}
 			word++;
@@ -147,6 +150,30 @@ int main(int argc, char** argv){
 		}
 		else if(*word == "COURSE"){
 			word++;
+			if(courses[*word].getCredits() < 0){
+				std::cout << "Course on line " << linenum << " is not offered." << std::endl;
+				linenum++;
+				continue;
+			}
+			std::string course = *word;
+			word++;
+			if(*word == "M") courses[*word].setRequired(Course::Require::Mandatory);
+			else if(*word == "R") {
+				courses[*word].setRequired(Course::Require::Required);
+				required.insert(*word);
+			}
+			else if(*word == "O") courses[*word].setRequired(Course::Require::Optional);
+			else{
+				std::cout << "Requirement option on line " << linenum << " must be M, R, or O! This line will be ignored." << std::endl;
+				linenum++;
+				continue;	
+			}
+			while(word != end){
+				word++;
+				if(courses[*word].getCredits() > 0){
+					courses[course].addPrereq(*word);
+				}
+			}
 		}
 		else if(*word == "CHOOSE"){
 			word++;
@@ -155,6 +182,17 @@ int main(int argc, char** argv){
 			std::cout << "Line " << linenum << ": Bad first word " << *word; 
 		}
 		linenum++;
+	}
+	
+	for(auto c = courses.begin(); c != courses.end(); c++){
+		Course crs = std::get<1>(*c);
+		if(crs.getRequired() == Course::Require::Unknown){
+			crs.setRequired(Course::Require::Optional);
+			for(std::string pre : required){
+				crs.addPrereq(pre);
+			}
+
+		}
 	}
 
 	//CHANGED: set up planned schedule to check in next loop
@@ -182,8 +220,7 @@ int main(int argc, char** argv){
 					student.addToSchedule(semester, *word);
 					credits += courses[*word].getCredits();
 					for(std::string t : courses[*word].getTags()){
-						student.addScheduleCredits(t, courses[*word].getCredits()); //this does credits the student is taking... I think.
-					}
+						student.addScheduleCredits(t, courses[*word].getCredits()); 					}
 				}
 				word++;
 			}
