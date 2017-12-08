@@ -188,7 +188,7 @@ int main(int argc, char** argv){
 			std::string choiceName = std::to_string(choiceCounter) + "CHOICE"; //choiseNames: 1CHOICE, 2CHOICE, 3CHOICE...
 			std::string numOfChoices;
 			word++;
-			if(std::regex_match(*word, std::regex("[0-9]+"))){
+			if(std::regex_match(*word, std::regex("[0-9]*[1-9]"))){
 				numOfChoices = *word;
 			} else {
 				std::cout << "Bad number format after CHOOSE. Must be a number greater than 1" << std::endl;
@@ -293,9 +293,42 @@ int main(int argc, char** argv){
 
 	//final check
 	bool reqsFulfilled = student.getRequirements().size() == 0;
-	bool creditsFulfilled; //todo
+	bool creditsFulfilled = true; //todo
+	std::vector<std::string> neededTags;
+	std::unordered_map<std::string, int> requiredCreds = student.getRequiredCredits();
+	std::unordered_map<std::string, int> fufilled = student.getScheduleCredits();
+	for(auto requirement = requiredCreds.begin(); requirement != requiredCreds.end(); requirement++){
+		std::string type = std::get<0>(*requirement);
+		int needed = std::get<1>(*requirement);
+		if(fufilled[type] < needed){
+			creditsFulfilled = false;
+			neededTags.push_back(type); 
+			break;	
+		}
+	}
 	if(reqsFulfilled && creditsFulfilled){
 		std::cout << "Good plan. Get to work." << std::endl;
+	}
+	else if(!reqsFulfilled){
+		std::cout << "Needed courses: ";
+		for(std::string r: student.getRequirements()){
+			if(r.find("CHOICE")){
+				std::cout << "One of (";
+				for(auto cou : student.getChoiceCourses()){
+					if(std::get<1>(cou) == r) std::cout << std::get<0>(cou) << " ";
+			}
+				std::cout << ") ";
+			} else {
+				std::cout << r << " ";
+			}
+		}
+	}
+	else{
+		std::cout << "You don't have enough ";
+		for(std::string c : neededTags){
+			std::cout << c << " "; 
+		}
+		std::cout << "credits to graduate.\n";
 	}
 }	
 
