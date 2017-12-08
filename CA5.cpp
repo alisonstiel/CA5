@@ -9,6 +9,7 @@
 #include <regex>
 #include <unordered_map>
 #include <unordered_set>
+#include <algorithm>
 #include <map>
 
 void fail(const std::string& reason);
@@ -114,13 +115,15 @@ int main(int argc, char** argv){
 	}
 	std::unordered_map<std::string, Course> courses = student.getCourses();
 	int linenum = 1;
+	int choiceCounter = 1;			
 	//set up requirement graph
 	std::unordered_set<std::string> required;
 	while(!reqs.eof()){
 		std::string line;
-		std::getline(planned,line);
+		std::getline(reqs,line);
 		std::istringstream aLine(line); 
 		std::istream_iterator<std::string> word(aLine), end;
+		std::cout << *word << std::endl;
 		if(*word == "TOTAL"){
 			word++;
 			if(std::regex_match(*word, std::regex("[0-9]+"))){
@@ -129,14 +132,14 @@ int main(int argc, char** argv){
 			} else {
 				std::cout << "Bad total number of CS credits needed one line " << linenum << std::endl;
 			}
-			
 		}
+
 		else if(*word == "CREDIT"){
 			word++;
 			std::string tag = *word;
 			if(!std::regex_match(tag, std::regex("[A-Z]"))){
 				std::cout << "CREDIT tag on line " << linenum << " must be exactly one letter long\n";
-				linenum++;
+				linenum++;				
 				continue;
 			}
 			word++;
@@ -148,24 +151,29 @@ int main(int argc, char** argv){
 			}
 		
 		}
+
 		else if(*word == "COURSE"){
 			word++;
 			if(courses[*word].getCredits() < 0){
 				std::cout << "Course on line " << linenum << " is not offered." << std::endl;
-				linenum++;
+				linenum++;				
 				continue;
 			}
 			std::string course = *word;
 			word++;
-			if(*word == "M") courses[*word].setRequired(Course::Require::Mandatory);
-			else if(*word == "R") {
+			if(*word == "M"){
+				courses[*word].setRequired(Course::Require::Mandatory);
+				student.addRequirement(course); 				
+			}else if(*word == "R") {
 				courses[*word].setRequired(Course::Require::Required);
 				required.insert(*word);
-			}
-			else if(*word == "O") courses[*word].setRequired(Course::Require::Optional);
-			else{
+				student.addRequirement(course); 								
+			}else if(*word == "O"){
+				courses[*word].setRequired(Course::Require::Optional);
+				student.addRequirement(course); 								
+			}else{
 				std::cout << "Requirement option on line " << linenum << " must be M, R, or O! This line will be ignored." << std::endl;
-				linenum++;
+				linenum++;				
 				continue;	
 			}
 			while(word != end){
@@ -175,13 +183,37 @@ int main(int argc, char** argv){
 				}
 			}
 		}
+
 		else if(*word == "CHOOSE"){
+			std::string choiceName = std::to_string(choiceCounter) + "CHOICE"; //choiseNames: 1CHOICE, 2CHOICE, 3CHOICE...
+			std::string numOfChoices;
 			word++;
+			if(std::regex_match(*word, std::regex("[0-9]+"))){
+				numOfChoices = *word;
+			} else {
+				std::cout << "Bad number format after CHOOSE. Must be a number greater than 1" << std::endl;
+				linenum++;
+				continue;
+			}
+			while(word != end){
+				word++;				
+				if(courses[*word].getCredits() < 0){
+					std::cout << "Course " << *word << "on line " << linenum << " is not offered." << std::endl;
+					linenum++;
+					continue;
+				}else{
+					courses[*word].setRequired(Course::Require::Choice);
+					student.addChoiceCourse(*word,choiceName);
+					student.addChoiceCounter(choiceName,std::stoi(numOfChoices));					
+					student.addRequirement(choiceName);
+				}
+			}
 		}
 		else{
-			std::cout << "Line " << linenum << ": Bad first word " << *word; 
+			std::cout << "Line " << linenum << ": Bad first word " << *word << std::endl; 
 		}
-		linenum++;
+		choiceCounter++;
+		linenum++;		
 	}
 	
 	for(auto c = courses.begin(); c != courses.end(); c++){
@@ -220,7 +252,8 @@ int main(int argc, char** argv){
 					student.addToSchedule(semester, *word);
 					credits += courses[*word].getCredits();
 					for(std::string t : courses[*word].getTags()){
-						student.addScheduleCredits(t, courses[*word].getCredits()); 					}
+						student.addScheduleCredits(t, courses[*word].getCredits()); 
+					}
 				}
 				word++;
 			}
@@ -235,14 +268,34 @@ int main(int argc, char** argv){
 		num++;
 
 	}
+
+
+
+
 //Prerequisite checking
 	for(auto sem = student.getSchedule().begin(); sem != student.getSchedule().end(); sem++){
 		for(auto course = std::get<1>(*sem).begin(); course != std::get<1>(*sem).end(); course++){
 			std::string lacking = student.findLackingPrereq(*course, std::get<0>(*sem));
 			if(lacking != ""){
 				fail(lacking + " is required to take " + *course);
+
+			//more checks to make sure course/semester is valid
+
+			}else if(courses[*course].getRequired() == Course::Require::Choice){ //this will take care of CHOOSE
+				std::string choiceName = student.getChoiceCourses()[*course];
+				student.getChoiceCounters()[choiceName]--;
+				if(student.getChoiceCounters()[choiceName] == 0) student.getRequirements().erase(choiceName); //choice requirements met
+			}else{
+				student.getRequirements().erase(*course);
 			}
 		}
+	}
+
+	//final check
+	bool reqsFulfilled = student.getRequirements().size() == 0;
+	bool creditsFulfilled; //todo
+	if(reqsFulfilled && creditsFulfilled){
+		std::cout << "Good plan. Get to work." << std::endl;
 	}
 }	
 
