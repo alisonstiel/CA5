@@ -7,7 +7,7 @@
 
 
 void Student::addRequirement(std::string courseName){
-    requirements[courseName] = false;
+    requirements.insert(courseName);
 }
 
 void Student::addToSchedule(std::string semester, std::string courseName){
@@ -39,7 +39,15 @@ void Student::addScheduleCredits(std::string reqType, int credits){
 	}
 }
 
-std::unordered_map<std::string, bool> Student::getRequirements(){
+void Student::addChoiceCourse(std::string courseName, std::string choiceName){
+	choiceCourses[courseName] = choiceName;
+}
+
+void Student::addChoiceCounter(std::string choiceName, int counter){
+	choiceCounters[choiceName] = counter;
+}			
+
+std::unordered_set<std::string> Student::getRequirements(){
     return requirements;
 }
 
@@ -57,6 +65,14 @@ std::unordered_map<std::string, int> Student::getRequiredCredits(){
 
 std::unordered_map<std::string, int> Student::getScheduleCredits(){
     return scheduleCredits;
+}
+
+std::unordered_map<std::string, std::string> Student::getChoiceCourses(){
+    return choiceCourses;
+}
+
+std::unordered_map<std::string, int> Student::getChoiceCounters(){
+    return choiceCounters;
 }
 
 std::string Student::findLackingPrereq(const std::string& courseName, const std::string& semester){
