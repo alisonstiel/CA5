@@ -1,0 +1,4 @@
+schedule.exe
+tests
+*.o
+*.swp
