@@ -17,7 +17,7 @@ void fail(const std::string& reason);
 int main(int argc, char** argv){
 	if(argc < 4){
 		std::cout << "Format: <requirements> <offerings> <schedule>\n";
-		return 1;
+	return 1;
 	}
 	std::ifstream reqs(argv[1]), offers(argv[2]), planned(argv[3]);
 	reqs.peek();
@@ -103,7 +103,7 @@ int main(int argc, char** argv){
 							std::cout << "Line " << num << ": Bad tag format " << tags << std::endl;
 						}
 					}
-				}else if(arr.at(0).find("CS")){
+				}if(arr.at(0).find("CS")){
 					newCourse.addTag("CS"); //courses that don't have tags are CS courses <- not true, see MA304!
 				}
 				student.addCourse(newCourse);				
@@ -113,7 +113,7 @@ int main(int argc, char** argv){
 		}
 		num++;
 	}
-	std::unordered_map<std::string, Course> courses = student.getCourses();
+	std::unordered_map<std::string, Course>& courses = student.getCourses();
 	int linenum = 1;
 	int choiceCounter = 1;			
 	//set up requirement graph
@@ -123,12 +123,12 @@ int main(int argc, char** argv){
 		std::getline(reqs,line);
 		std::istringstream aLine(line); 
 		std::istream_iterator<std::string> word(aLine), end;
-		std::cout << *word << std::endl;
+		//std::cout << *word << std::endl;
 		if(*word == "TOTAL"){
 			word++;
 			if(std::regex_match(*word, std::regex("[0-9]+"))){
 				int cred = std::stoi(*word);
-				student.addRequiredCredits("total", cred); 
+				student.addRequiredCredits("CS", cred); 
 			} else {
 				std::cout << "Bad total number of CS credits needed one line " << linenum << std::endl;
 			}
@@ -145,7 +145,7 @@ int main(int argc, char** argv){
 			word++;
 			if(std::regex_match(*word, std::regex("[0-9]+"))){
 				int cred = std::stoi(*word);
-				student.addRequiredCredits("total", cred); 
+				student.addRequiredCredits(tag, cred); 
 			} else {
 				std::cout << "Bad total number of CS credits needed" << std::endl;
 			}
@@ -170,22 +170,30 @@ int main(int argc, char** argv){
 				student.addRequirement(course); 								
 			}else if(*word == "O"){
 				courses[*word].setRequired(Course::Require::Optional);
-				student.addRequirement(course); 								
+				//student.addRequirement(course); 								
 			}else{
 				std::cout << "Requirement option on line " << linenum << " must be M, R, or O! This line will be ignored." << std::endl;
 				linenum++;				
 				continue;	
 			}
 			while(word != end){
-				word++;
+				//std::cout << "Dong?" << std::endl;
 				if(courses[*word].getCredits() > 0){
 					courses[course].addPrereq(*word);
+					//std::cout << "what.\n";
 				}
+				word++;
 			}
+			//std::cout << course << ": ";
+			//for(std::string g : courses[course].prereqs){
+				//std::cout << g << " ";
+			//}
+			//std::cout << std::endl;
 		}
 
 		else if(*word == "CHOOSE"){
 			std::string choiceName = std::to_string(choiceCounter) + "CHOICE"; //choiseNames: 1CHOICE, 2CHOICE, 3CHOICE...
+			//std::cout << choiceName << std::endl;
 			std::string numOfChoices;
 			word++;
 			if(std::regex_match(*word, std::regex("[0-9]*[1-9]"))){
@@ -210,23 +218,12 @@ int main(int argc, char** argv){
 			}
 		}
 		else{
-			std::cout << "Line " << linenum << ": Bad first word " << *word << std::endl; 
+			std::cout << "Requirements file Line " << linenum << ": Bad first word " << *word << std::endl; 
 		}
 		choiceCounter++;
 		linenum++;		
 	}
 	
-	for(auto c = courses.begin(); c != courses.end(); c++){
-		Course crs = std::get<1>(*c);
-		if(crs.getRequired() == Course::Require::Unknown){
-			crs.setRequired(Course::Require::Optional);
-			for(std::string pre : required){
-				crs.addPrereq(pre);
-			}
-
-		}
-	}
-
 	//CHANGED: set up planned schedule to check in next loop
 	int num = 1;
 	while(!planned.eof()){
@@ -234,11 +231,11 @@ int main(int argc, char** argv){
 		std::getline(planned,line);
 		std::istringstream aLine(line); 
 		std::istream_iterator<std::string> word(aLine), end;
-		std::regex semester_format("S|F[0-9]{4,}");
+		std::regex semester_format("(S|F)[0-9]{4,}");
 		if(std::regex_match(*word, semester_format)){
 			semester = *word;
 			word++;
-			int credits;
+			int credits = 0;
 			while(word != end){
 				if(courses[*word].getCredits() < 0){
 					fail("Course " + *word + " is not offered here.");
@@ -250,6 +247,7 @@ int main(int argc, char** argv){
 					fail("Course " + *word + " is not offered in the spring");
 				} else {
 					student.addToSchedule(semester, *word);
+					//std::cout << semester << " " << *word << std::endl;
 					credits += courses[*word].getCredits();
 					for(std::string t : courses[*word].getTags()){
 						student.addScheduleCredits(t, courses[*word].getCredits()); 
@@ -260,10 +258,10 @@ int main(int argc, char** argv){
 			if(credits > 18){
 				std::cout << "Note: you are overloading on semester " << semester << ". This may require special approval depending on your GPA." << std::endl;
 			} else if(credits < 12){
-				std::cout << "Warning: the schedule for" << semester << " is not full-time (at least 12 credits). This may endanger federal financial aid." << std::endl;
+				std::cout << "Warning: the schedule for " << semester << " is not full-time (at least 12 credits). This may endanger federal financial aid." << std::endl;
 			}
 		} else {
-			std::cout << "Line " << num << ": Bad semester name " << *word;
+			std::cout << "Plan file Line " << num << ": Bad semester name " << *word << std::endl;
 		}
 		num++;
 
@@ -271,22 +269,29 @@ int main(int argc, char** argv){
 
 
 
-
+	/*for(auto p : student.getSchedule()){
+		std::cout << std::get<0>(p) << ": ";
+		for(auto d : std::get<1>(p)){
+			std::cout << d << std::endl;
+		}
+	}*/
 //Prerequisite checking
-	for(auto sem = student.getSchedule().begin(); sem != student.getSchedule().end(); sem++){
-		for(auto course = std::get<1>(*sem).begin(); course != std::get<1>(*sem).end(); course++){
-			std::string lacking = student.findLackingPrereq(*course, std::get<0>(*sem));
+	for(auto sem : student.getSchedule()){
+		//std::cout << std::get<0>(sem);
+		for(auto course : std::get<1>(sem)){
+			//std::cout << "lol";
+			std::string lacking = student.findLackingPrereq(course, std::get<0>(sem));
 			if(lacking != ""){
-				fail(lacking + " is required to take " + *course);
+				fail(lacking + " is required to take " + course);
 
 			//more checks to make sure course/semester is valid
 
-			}else if(courses[*course].getRequired() == Course::Require::Choice){ //this will take care of CHOOSE
-				std::string choiceName = student.getChoiceCourses()[*course];
+			}else if(courses[course].getRequired() == Course::Require::Choice){ //this will take care of CHOOSE
+				std::string choiceName = student.getChoiceCourses()[course];
 				student.getChoiceCounters()[choiceName]--;
 				if(student.getChoiceCounters()[choiceName] == 0) student.getRequirements().erase(choiceName); //choice requirements met
 			}else{
-				student.getRequirements().erase(*course);
+				student.getRequirements().erase(course);
 			}
 		}
 	}
@@ -302,8 +307,7 @@ int main(int argc, char** argv){
 		int needed = std::get<1>(*requirement);
 		if(fufilled[type] < needed){
 			creditsFulfilled = false;
-			neededTags.push_back(type); 
-			break;	
+			neededTags.push_back(type); 	
 		}
 	}
 	if(reqsFulfilled && creditsFulfilled){
@@ -312,21 +316,25 @@ int main(int argc, char** argv){
 	else if(!reqsFulfilled){
 		std::cout << "Needed courses: ";
 		for(std::string r: student.getRequirements()){
-			if(r.find("CHOICE")){
-				std::cout << "One of (";
+			//std::cout << "***" << r << "***" << std::endl;
+			if(std::regex_match(r, std::regex("CHOICE"))){
+				std::cout << student.getChoiceCounters()[r] << " more of " << "( ";
 				for(auto cou : student.getChoiceCourses()){
-					if(std::get<1>(cou) == r) std::cout << std::get<0>(cou) << " ";
-			}
+					if(std::get<1>(cou) == r){
+						std::cout << std::get<0>(cou) << " ";
+					}			
+				}	
 				std::cout << ") ";
 			} else {
 				std::cout << r << " ";
 			}
 		}
+		std::cout << std::endl;
 	}
 	else{
 		std::cout << "You don't have enough ";
 		for(std::string c : neededTags){
-			std::cout << c << " "; 
+			std::cout << c ;// << " (" << student.getScheduleCredits()[c] << ") "; 
 		}
 		std::cout << "credits to graduate.\n";
 	}

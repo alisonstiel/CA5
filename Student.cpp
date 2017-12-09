@@ -12,11 +12,13 @@ void Student::addRequirement(std::string courseName){
 
 void Student::addToSchedule(std::string semester, std::string courseName){
 	if(semester.front() == 'S'){
-		semester.erase(0,0);
+		semester.erase(0,1);
 		semester+=".1";
+		//std::cout << semester << std::endl;
 	}else if(semester.front() == 'F'){
-		semester.erase(0,0);
+		semester.erase(0,1);
 		semester+=".2";
+		//std::cout << semester << std::endl;
 	}else{
 		std::cout << "Bad semester format" << std::endl;
 	}
@@ -47,61 +49,82 @@ void Student::addChoiceCounter(std::string choiceName, int counter){
 	choiceCounters[choiceName] = counter;
 }			
 
-std::unordered_set<std::string> Student::getRequirements(){
+std::unordered_set<std::string>& Student::getRequirements(){
     return requirements;
 }
 
-std::map<std::string, std::unordered_set<std::string> > Student::getSchedule(){
+std::map<std::string, std::unordered_set<std::string> >& Student::getSchedule(){
     return schedule;
 }
 
-std::unordered_map<std::string, Course> Student::getCourses(){
+std::unordered_map<std::string, Course>& Student::getCourses(){
     return courses;
 }
 
-std::unordered_map<std::string, int> Student::getRequiredCredits(){
+std::unordered_map<std::string, int>& Student::getRequiredCredits(){
     return requiredCredits;
 }
 
-std::unordered_map<std::string, int> Student::getScheduleCredits(){
+std::unordered_map<std::string, int>& Student::getScheduleCredits(){
     return scheduleCredits;
 }
 
-std::unordered_map<std::string, std::string> Student::getChoiceCourses(){
+std::unordered_map<std::string, std::string>& Student::getChoiceCourses(){
     return choiceCourses;
 }
 
-std::unordered_map<std::string, int> Student::getChoiceCounters(){
+std::unordered_map<std::string, int>& Student::getChoiceCounters(){
     return choiceCounters;
 }
 
-std::string Student::findLackingPrereq(const std::string& courseName, const std::string& semester){
+std::string Student::findLackingPrereq(const std::string& courseName, std::string semester){
 	std::list<std::string> queue;
+	//std::cout << courseName << std::endl;
+	//std::cout << "Dong!" << std::endl;
 	for(auto i = courses.begin(); i != courses.end(); i++){
 		(std::get<1>(*i)).touched = false;
 	}
-	if(courses.count(courseName) == 0){
+	if(courses[courseName].getCredits() < 0){
 		return "Course does not exist";
 	}
+	queue.push_back(courseName);
 	while(queue.size() > 0){
+		//std::cout << "Ding!" << std::endl;
 		Course c = courses[*queue.begin()];
+		//std::cout << '\t' << *queue.begin() << std::endl;
 		queue.pop_front();
 		c.touched = true;
-		for(auto pre = c.prereqs.begin(); pre != c.prereqs.end(); pre++){
-			courses[*pre].touched = true;
-			if(schedule.count(*pre) == 0){
-				return *pre;
+		//std::cout << '\t' << c.getCredits() << std::endl;
+		//std::cout << c.prereqs.size() << std::endl;
+		for(std::string pre : c.prereqs){
+			//std::cout << "AAAIIIIEEEE!!!!" << std::endl;
+			if(!courses[pre].touched) queue.push_back(pre);
+			courses[pre].touched = true;
+			//std::cout << "\t\t" << pre << std::endl;
+			if(!hasTaken(pre, semester)){
+				return pre;
 			}
-			if(!courses[*pre].touched) queue.push_back(*pre);
+			
 		}
 	}
 	return "";
 
 }
 //Check to see if student has taken the course before the given semester
-bool Student::hasTaken(const std::string& course, const std::string& semester){
-	for(auto sem = schedule.begin(); sem != schedule.end() && std::get<0>(*sem) < semester; sem++){
-		if(std::get<1>(*sem).count(course)) return true;
+bool Student::hasTaken(const std::string& course, std::string semester){
+	if(semester.front() == 'S'){
+		semester.erase(0,1);
+		semester+=".1";
+		//std::cout << semester << std::endl;
+	}else if(semester.front() == 'F'){
+		semester.erase(0,1);
+		semester+=".2";
+		//std::cout << semester << std::endl;
+	}
+	//std::cout << semester << std::endl;
+	for(auto sem : schedule){ //It only works with this version of iteration, somehow
+		if(std::get<0>(sem) >=  semester) return false;
+		if(std::get<1>(sem).count(course)) return true;
 	}
 	return false;
 }

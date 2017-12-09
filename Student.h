@@ -13,15 +13,15 @@ class Student{
 		void addScheduleCredits(std::string reqType, int credits);
 		void addChoiceCourse(std::string courseName, std::string choiceName);
 		void addChoiceCounter(std::string choiceName, int counter);				
-		std::unordered_set<std::string> getRequirements();
-		std::map<std::string, std::unordered_set<std::string> > getSchedule();
-		std::unordered_map<std::string, Course> getCourses();
-		std::unordered_map<std::string, int> getRequiredCredits();	
-		std::unordered_map<std::string, int> getScheduleCredits();
-		std::unordered_map<std::string, std::string> getChoiceCourses();
-		std::unordered_map<std::string, int> getChoiceCounters();				
-		bool hasTaken(const std::string& course, const std::string& semester);
-		std::string findLackingPrereq(const std::string& courseName, const std::string& semester);
+		std::unordered_set<std::string>& getRequirements();
+		std::map<std::string, std::unordered_set<std::string>>& getSchedule();
+		std::unordered_map<std::string, Course>& getCourses();
+		std::unordered_map<std::string, int>& getRequiredCredits();	
+		std::unordered_map<std::string, int>& getScheduleCredits();
+		std::unordered_map<std::string, std::string>& getChoiceCourses();
+		std::unordered_map<std::string, int>& getChoiceCounters();				
+		bool hasTaken(const std::string& course, std::string semester);
+		std::string findLackingPrereq(const std::string& courseName, std::string semester);
 	private:
 		std::unordered_set<std::string> requirements; //student's course requirements in order to graduate
 		std::map<std::string, std::unordered_set<std::string> > schedule; //student's complete planned schedule, ordered by semester
